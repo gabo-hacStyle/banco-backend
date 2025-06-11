@@ -27,14 +27,14 @@ public class TransactionService implements TransactionUseCases {
 
     @Override
     public Transaction createTransaction(TransactionCreateDTO dto) {
-        Transaction.Type type = Transaction.Type.valueOf(dto.getType());
+
         BigDecimal amount = dto.getAmount();
 
-        // Validar productos
         Product source = null;
         Product target = null;
 
-        if (type == Transaction.Type.DEPOSIT) {
+        if (String.valueOf(Transaction.Type.DEPOSIT).equalsIgnoreCase(dto.getType())) {
+            Transaction.Type type = Transaction.Type.valueOf(dto.getType());
             target = productRepository.findById(dto.getTargetProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Cuenta destino no existe"));
 
@@ -45,8 +45,8 @@ public class TransactionService implements TransactionUseCases {
                     new Transaction(null, type, amount, null, Transaction.Status.SUCCESS, null, target.getId(), dto.getDescription())
             );
         }
-
-        if (type == Transaction.Type.WITHDRAWAL) {
+        else if (String.valueOf(Transaction.Type.WITHDRAWAL).equalsIgnoreCase(dto.getType())) {
+            Transaction.Type type = Transaction.Type.valueOf(dto.getType());
             source = productRepository.findById(dto.getSourceProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Cuenta origen no existe"));
             if (source.getBalance().compareTo(amount) < 0)
@@ -59,8 +59,8 @@ public class TransactionService implements TransactionUseCases {
                     new Transaction(null, type, amount, null, Transaction.Status.SUCCESS, source.getId(), null, dto.getDescription())
             );
         }
-
-        if (type == Transaction.Type.TRANSFER) {
+        else if  (String.valueOf(Transaction.Type.TRANSFER).equalsIgnoreCase(dto.getType())) {
+            Transaction.Type type = Transaction.Type.valueOf(dto.getType());
             source = productRepository.findById(dto.getSourceProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Cuenta origen no existe"));
             target = productRepository.findById(dto.getTargetProductId())
@@ -68,8 +68,11 @@ public class TransactionService implements TransactionUseCases {
             if (source.getBalance().compareTo(amount) < 0)
                 throw new IllegalArgumentException("Saldo insuficiente para transferir");
 
+
+            //Aca paso el nuevo balance
             source.updateBalance(source.getBalance().subtract(amount));
             target.updateBalance(target.getBalance().add(amount));
+
             productRepository.save(source);
             productRepository.save(target);
 
@@ -80,9 +83,11 @@ public class TransactionService implements TransactionUseCases {
             return transactionRepository.save(
                     new Transaction(null, type, amount, null, Transaction.Status.SUCCESS, source.getId(), target.getId(), "Crédito transferencia: " + dto.getDescription())
             );
+        } else {
+
+            throw new IllegalArgumentException("Tipo de transacción no soportado");
         }
 
-        throw new IllegalArgumentException("Tipo de transacción no soportado");
     }
 
     @Override

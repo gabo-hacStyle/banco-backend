@@ -6,8 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-@AllArgsConstructor
-@NoArgsConstructor
+
 @Data
 public class TransactionCreateDTO {
     private String type;

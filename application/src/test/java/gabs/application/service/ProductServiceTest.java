@@ -38,6 +38,7 @@ class ProductServiceTest {
         dto.setType("OTRO");
         dto.setExemptGMF(false);
         dto.setClientId(1L);
+        when(repoClient.findById(1L)).thenReturn(Optional.of(mock(Client.class)));
 
         Exception ex = assertThrows(IllegalArgumentException.class, () -> service.createProduct(dto));
         assertEquals("Tipo de producto inválido", ex.getMessage());

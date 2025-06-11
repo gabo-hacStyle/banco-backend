@@ -29,8 +29,7 @@ public class Transaction {
 
     public Transaction(Long id, Type type, BigDecimal amount, LocalDateTime date, Status status,
                        Long sourceProductId, Long targetProductId, String description) {
-        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0)
-            throw new IllegalArgumentException("El monto debe ser positivo");
+
         this.id = id;
         this.type = type;
         this.amount = amount;
