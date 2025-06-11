@@ -1,15 +1,11 @@
 package gabs.domain.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-
-@NoArgsConstructor
+@Getter
 public class Product {
 
     public enum Type { SAVINGS, CHECKING }
@@ -23,7 +19,7 @@ public class Product {
     private boolean exemptGMF;
     private LocalDateTime creationDate;
     private LocalDateTime updateDate;
-    private Long clientId; // Id del cliente propietario
+    private Long clientId;
 
     public Product(Long id, Type type, String accountNumber, Status status, BigDecimal balance,
                    boolean exemptGMF, LocalDateTime creationDate, LocalDateTime updateDate, Long clientId) {
@@ -38,39 +34,33 @@ public class Product {
         this.clientId = clientId;
     }
 
-    // Factoría para crear cuenta corriente
-    public static Product createChecking(Long clientId, boolean exemptGMF) {
-        String number = ProductNumberGenerator.generateCheckingAccountNumber();
+    // Factoría genérica para cuentas
+    public static Product createChecking(Long clientId, boolean exemptGMF, String accountNumber) {
+        validateAccountNumber(accountNumber, "33", "corriente");
         return new Product(
-                null,
-                Type.CHECKING,
-                number,
-                Status.INACTIVE,
-                BigDecimal.ZERO,
-                exemptGMF,
-                LocalDateTime.now(),
-                null,
-                clientId
+                null, Type.CHECKING, accountNumber, Status.INACTIVE,
+                BigDecimal.ZERO, exemptGMF, LocalDateTime.now(), null, clientId
         );
     }
 
-    // Factoría para crear cuenta de ahorros
-    public static Product createSavings(Long clientId, boolean exemptGMF) {
-        String number = ProductNumberGenerator.generateSavingsAccountNumber();
+    public static Product createSavings(Long clientId, boolean exemptGMF, String accountNumber) {
+        validateAccountNumber(accountNumber, "53", "ahorros");
         return new Product(
-                null,
-                Type.SAVINGS,
-                number,
-                Status.ACTIVE,
-                BigDecimal.ZERO,
-                exemptGMF,
-                LocalDateTime.now(),
-                null,
-                clientId
+                null, Type.SAVINGS, accountNumber, Status.ACTIVE,
+                BigDecimal.ZERO, exemptGMF, LocalDateTime.now(), null, clientId
         );
     }
 
-    // Activar o inactivar cuenta
+    // Validación reutilizable
+    private static void validateAccountNumber(String accountNumber, String prefix, String tipo) {
+        if (!accountNumber.startsWith(prefix)) {
+            throw new IllegalArgumentException("Número de cuenta de " + tipo + " debe empezar en " + prefix);
+        }
+        if (accountNumber.length() != 10 || !accountNumber.matches("\\d{10}")) {
+            throw new IllegalArgumentException("El número de cuenta debe tener exactamente 10 dígitos numéricos");
+        }
+    }
+
     public void activate() {
         if (status == Status.CANCELED) throw new IllegalStateException("No se puede activar una cuenta cancelada");
         this.status = Status.ACTIVE;
@@ -82,7 +72,6 @@ public class Product {
         this.updateDate = LocalDateTime.now();
     }
 
-    // Cancelar solo si saldo == 0
     public void cancel() {
         if (this.balance.compareTo(BigDecimal.ZERO) != 0)
             throw new IllegalStateException("Solo se pueden cancelar cuentas con saldo 0");
@@ -90,7 +79,6 @@ public class Product {
         this.updateDate = LocalDateTime.now();
     }
 
-    // Actualizar saldo (solo permitido si nueva regla lo permite)
     public void updateBalance(BigDecimal amount) {
         if (type == Type.SAVINGS && amount.compareTo(BigDecimal.ZERO) < 0)
             throw new IllegalArgumentException("La cuenta de ahorros no puede tener saldo menor a 0");
@@ -98,21 +86,9 @@ public class Product {
         this.updateDate = LocalDateTime.now();
     }
 
-    // Getters
-    public Long getId() { return id; }
-    public Type getType() { return type; }
-    public String getAccountNumber() { return accountNumber; }
-    public Status getStatus() { return status; }
-    public BigDecimal getBalance() { return balance; }
-    public boolean isExemptGMF() { return exemptGMF; }
-    public LocalDateTime getCreationDate() { return creationDate; }
-    public LocalDateTime getUpdateDate() { return updateDate; }
-    public Long getClientId() { return clientId; }
-
     // Setters (solo id para repositorio)
     public void setId(Long id) { this.id = id; }
 
-    // equals/hashCode solo por id y numero de cuenta
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -125,6 +101,4 @@ public class Product {
     public int hashCode() {
         return Objects.hash(accountNumber);
     }
-
-
 }

@@ -4,6 +4,7 @@ import gabs.application.dto.ProductCreateDTO;
 import gabs.application.ports.ProductUseCases;
 import gabs.application.service.ProductService;
 import gabs.domain.entity.Product;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +16,8 @@ import java.util.List;
 public class ProductController {
 
     private final ProductUseCases productService;
-    public ProductController(ProductService productService) {
+
+    public ProductController(ProductUseCases productService) {
         this.productService = productService;
     }
 
@@ -31,6 +33,7 @@ public class ProductController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
 
     @GetMapping("/client/{clientId}")
     public ResponseEntity<List<Product>> getByClient(@PathVariable Long clientId) {
