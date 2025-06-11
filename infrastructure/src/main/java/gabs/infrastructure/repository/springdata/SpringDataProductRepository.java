@@ -10,4 +10,5 @@ public interface SpringDataProductRepository extends JpaRepository<ProductEntity
     Optional<ProductEntity> findByAccountNumber(String accountNumber);
     List<ProductEntity> findByClient_Id(Long clientId);
     boolean existsByAccountNumber(String accountNumber);
+    boolean existsByClientId(Long clientId);
 }

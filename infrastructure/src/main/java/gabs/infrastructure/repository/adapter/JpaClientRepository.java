@@ -5,6 +5,7 @@ import gabs.domain.ports.ClientRepository;
 import gabs.infrastructure.repository.springdata.SpringDataClientRepository;
 import gabs.infrastructure.repository.entity.ClientEntity;
 import gabs.infrastructure.repository.mapper.ClientMapper;
+import gabs.infrastructure.repository.springdata.SpringDataProductRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -18,10 +19,12 @@ import java.util.stream.Collectors;
 public class JpaClientRepository implements ClientRepository {
 
     private final SpringDataClientRepository springRepo;
+    private final SpringDataProductRepository productRepository;
 
     @Autowired
-    public JpaClientRepository(SpringDataClientRepository springRepo) {
+    public JpaClientRepository(SpringDataClientRepository springRepo, SpringDataProductRepository productRepository) {
         this.springRepo = springRepo;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -53,7 +56,6 @@ public class JpaClientRepository implements ClientRepository {
 
     @Override
     public boolean hasLinkedProducts(Long clientId) {
-        // Implementación real aquí
-        return false;
+        return productRepository.existsByClientId(clientId);
     }
 }
