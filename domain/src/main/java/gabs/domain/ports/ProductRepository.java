@@ -10,6 +10,6 @@ public interface ProductRepository {
     Optional<Product> findById(Long id);
     List<Product> findByClientId(Long clientId);
     Optional<Product> findByAccountNumber(String accountNumber);
-    void deleteById(Long id);
+
     boolean existsByAccountNumber(String accountNumber);
 }

@@ -62,6 +62,42 @@ public class ProductService implements ProductUseCases {
     }
 
     @Override
+    public Product activateProduct(String accountNumber) {
+
+        Optional<Product> product = productRepository.findByAccountNumber(accountNumber);
+        if (product.isEmpty()) throw new IllegalArgumentException("Producto no encontrado");
+
+        Product prod = product.get();
+        prod.activate();
+        productRepository.save(prod);
+
+        return prod;
+    }
+
+    @Override
+    public Product inactivateProduct(String accountNumber) {
+        Optional<Product> product = productRepository.findByAccountNumber(accountNumber);
+        if (product.isEmpty()) throw new IllegalArgumentException("Producto no encontrado");
+
+        Product prod = product.get();
+        prod.inactivate();
+        productRepository.save(prod);
+
+        return prod;
+    }
+
+    @Override
+    public Product cancelProduct(String accountNumber) {
+        Optional<Product> product = productRepository.findByAccountNumber(accountNumber);
+        if (product.isEmpty()) throw new IllegalArgumentException("Producto no encontrado");
+        Product prod = product.get();
+        prod.cancel();
+        productRepository.save(prod);
+
+        return prod;
+    }
+
+    @Override
     public Optional<Product> findByAccountNumber(String accountNumber) {
         return productRepository.findByAccountNumber(accountNumber);
     }
@@ -69,4 +105,6 @@ public class ProductService implements ProductUseCases {
     public List<Product> findByClientId(Long clientId) {
         return productRepository.findByClientId(clientId);
     }
+
+
 }

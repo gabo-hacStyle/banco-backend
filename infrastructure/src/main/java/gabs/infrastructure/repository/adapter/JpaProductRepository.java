@@ -49,10 +49,7 @@ public class JpaProductRepository implements ProductRepository {
         return productRepo.findByAccountNumber(accountNumber).map(ProductMapper::toDomain);
     }
 
-    @Override
-    public void deleteById(Long id) {
-        productRepo.deleteById(id);
-    }
+
 
     @Override
     public boolean existsByAccountNumber(String accountNumber) {

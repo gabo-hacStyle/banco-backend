@@ -1,6 +1,8 @@
 package gabs.domain.entity;
 
 import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -11,6 +13,8 @@ public class Product {
     public enum Type { SAVINGS, CHECKING }
     public enum Status { ACTIVE, INACTIVE, CANCELED }
 
+    // Setters (solo id para repositorio)
+    @Setter
     private Long id;
     private Type type;
     private String accountNumber;
@@ -63,11 +67,16 @@ public class Product {
 
     public void activate() {
         if (status == Status.CANCELED) throw new IllegalStateException("No se puede activar una cuenta cancelada");
+        if (status == Status.ACTIVE) throw new IllegalStateException("Esta cuenta ya está activada");
+
+
         this.status = Status.ACTIVE;
         this.updateDate = LocalDateTime.now();
     }
     public void inactivate() {
         if (status == Status.CANCELED) throw new IllegalStateException("No se puede inactivar una cuenta cancelada");
+        if (status == Status.INACTIVE) throw new IllegalStateException("Esta cuenta ya está inactiva");
+
         this.status = Status.INACTIVE;
         this.updateDate = LocalDateTime.now();
     }
@@ -86,14 +95,10 @@ public class Product {
         this.updateDate = LocalDateTime.now();
     }
 
-    // Setters (solo id para repositorio)
-    public void setId(Long id) { this.id = id; }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Product)) return false;
-        Product account = (Product) o;
+        if (!(o instanceof Product account)) return false;
         return Objects.equals(accountNumber, account.accountNumber);
     }
 

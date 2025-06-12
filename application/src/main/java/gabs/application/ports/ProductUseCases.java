@@ -9,6 +9,9 @@ import java.util.Optional;
 public interface ProductUseCases {
 
     Product createProduct(ProductCreateDTO dto);
+    Product activateProduct(String accountNumber);
+    Product inactivateProduct(String accountNumber);
+    Product cancelProduct(String accountNumber);
 
     Optional<Product> findByAccountNumber(String accountNumber);
     List<Product> findByClientId(Long clientId);

@@ -46,4 +46,19 @@ public class ProductController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PutMapping("/{accountNumber}/enable")
+    public Product enable(@PathVariable String accountNumber) {
+        return productService.activateProduct(accountNumber);
+    }
+    @PutMapping("/{accountNumber}/disable")
+    public Product disable(@PathVariable String accountNumber) {
+
+        return productService.inactivateProduct(accountNumber);
+
+    }
+    @PutMapping("/{accountNumber}/cancel")
+    public Product cancel(@PathVariable String accountNumber) {
+        return productService.cancelProduct(accountNumber);
+    }
 }
