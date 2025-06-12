@@ -35,10 +35,18 @@ public class TransactionService implements TransactionUseCases {
         Product target = null;
 
 
+
+
         if (String.valueOf(Transaction.Type.DEPOSIT).equalsIgnoreCase(dto.getType())) {
+
             Transaction.Type type = Transaction.Type.valueOf(dto.getType());
             target = productRepository.findByAccountNumber(dto.getTargetProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Cuenta destino no existe"));
+
+            if (target.getStatus() != Product.Status.ACTIVE) {
+                throw new IllegalArgumentException("No se puede hacer depósito a una cuenta inactiva o cancelada");
+            }
+
             target.updateBalance(target.getBalance().add(amount));
             productRepository.save(target);
 
@@ -50,6 +58,10 @@ public class TransactionService implements TransactionUseCases {
             Transaction.Type type = Transaction.Type.valueOf(dto.getType());
             source = productRepository.findByAccountNumber(dto.getSourceProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Cuenta origen no existe"));
+
+            if (source.getStatus() != Product.Status.ACTIVE) {
+                throw new IllegalArgumentException("No se puede hacer retiro desde una cuenta inactiva o cancelada");
+            }
             if (source.getBalance().compareTo(amount) < 0)
                 throw new IllegalArgumentException("Saldo insuficiente para retiro");
 
@@ -66,6 +78,14 @@ public class TransactionService implements TransactionUseCases {
                     .orElseThrow(() -> new IllegalArgumentException("Cuenta origen no existe"));
             target = productRepository.findByAccountNumber(dto.getTargetProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Cuenta destino no existe"));
+
+            if (source.getStatus() != Product.Status.ACTIVE) {
+                throw new IllegalArgumentException("No se puede transferir desde una cuenta inactiva o cancelada");
+            }
+            if (target.getStatus() != Product.Status.ACTIVE) {
+                throw new IllegalArgumentException("No se puede transferir a una cuenta inactiva o cancelada");
+            }
+
             if (source.getBalance().compareTo(amount) < 0)
                 throw new IllegalArgumentException("Saldo insuficiente para transferir");
 
