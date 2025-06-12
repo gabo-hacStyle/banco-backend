@@ -29,6 +29,14 @@ public class ProductService implements ProductUseCases {
             throw new IllegalArgumentException("Cliente no existe");
         }
 
+        if (dto.isExemptGMF()) {
+            boolean alreadyExempt = productRepository.findByClientId(dto.getClientId())
+                    .stream().anyMatch(Product::isExemptGMF);
+            if (alreadyExempt) {
+                throw new IllegalArgumentException("El cliente ya tiene una cuenta exenta de GMF");
+            }
+        }
+
         //Here we automatically generate a number
         String accountNumber;
         int maxAttempts = 10;

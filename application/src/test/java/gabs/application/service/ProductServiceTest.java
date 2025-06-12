@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -106,4 +107,23 @@ class ProductServiceTest {
         verify(repo).save(any());
         assertEquals(expectedProduct, result);
     }
+
+    @Test
+    void shouldNotAllowMultipleExemptGMFAccountsPerClient() {
+        Long clientId = 1L;
+        // Simula existente exenta de GMF
+        Product existing = mock(Product.class);
+        when(existing.isExemptGMF()).thenReturn(true);
+        when(repoClient.findById(clientId)).thenReturn(Optional.of(mock(Client.class)));
+        when(repo.findByClientId(clientId)).thenReturn(List.of(existing));
+
+        ProductCreateDTO dto = new ProductCreateDTO();
+        dto.setClientId(clientId);
+        dto.setExemptGMF(true);
+
+        Exception ex = assertThrows(IllegalArgumentException.class,
+                () -> service.createProduct(dto));
+        assertEquals("El cliente ya tiene una cuenta exenta de GMF", ex.getMessage());
+    }
+
 }
