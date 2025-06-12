@@ -1,6 +1,7 @@
 package gabs.application.service;
 
 import gabs.application.dto.ClientDTO;
+import gabs.application.dto.CreateClientDTO;
 import gabs.application.ports.ClientUseCase;
 import gabs.domain.entity.Client;
 import gabs.domain.ports.ClientRepository;
@@ -20,7 +21,8 @@ public class ClientService  implements ClientUseCase {
     }
 
     @Override
-    public ClientDTO createClient(ClientDTO dto) {
+    public ClientDTO createClient(CreateClientDTO dto) {
+
         if (clientRepository.existsByIdentificationNumber(dto.identificationNumber)) {
             throw new IllegalArgumentException("Ya existe un cliente con ese número de identificación");
         }
@@ -30,7 +32,7 @@ public class ClientService  implements ClientUseCase {
     }
 
     @Override
-    public ClientDTO updateClient(Long id, ClientDTO dto) {
+    public ClientDTO updateClient(Long id, CreateClientDTO dto) {
         Optional<Client> opt = clientRepository.findById(id);
         if (opt.isEmpty()) throw new IllegalArgumentException("Cliente no encontrado");
 
@@ -41,6 +43,7 @@ public class ClientService  implements ClientUseCase {
         if (dto.lastName != null) client.setLastName(dto.lastName);
         if (dto.email != null) client.setEmail(dto.email);
         if (dto.birthDate != null) client.setBirthDate(dto.birthDate);
+        client.setUpdateDate(LocalDateTime.now());
 
         Client updated = clientRepository.save(client);
         return toDTO(updated);

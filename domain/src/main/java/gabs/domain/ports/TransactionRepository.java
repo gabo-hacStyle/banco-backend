@@ -8,6 +8,6 @@ import java.util.Optional;
 public interface TransactionRepository {
     Transaction save(Transaction transaction);
     Optional<Transaction> findById(Long id);
-    List<Transaction> findByProductId(Long productId);
+    List<Transaction> findByProductAccountNumber(String productAccountNumber);
     List<Transaction> findAll();
 }

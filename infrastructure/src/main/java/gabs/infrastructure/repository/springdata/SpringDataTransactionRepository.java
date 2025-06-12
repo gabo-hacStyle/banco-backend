@@ -7,6 +7,5 @@ import java.util.List;
 
 public interface SpringDataTransactionRepository extends JpaRepository<TransactionEntity, Long> {
 
-    List<TransactionEntity> findBySourceProduct_IdOrTargetProduct_Id(Long sourceId, Long targetId);
-
+    List<TransactionEntity> findBySourceAccountNumberOrTargetAccountNumber(String target, String source);
 }

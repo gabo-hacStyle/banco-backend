@@ -9,6 +9,9 @@ import java.util.Optional;
 public interface TransactionUseCases {
     Transaction createTransaction(TransactionCreateDTO dto);
     Optional<Transaction> findById(Long id);
-    List<Transaction> findByProductId(Long productId);
+
+
+    List<Transaction> findByProductAccountNumber(String productAccountNumber);
+
     List<Transaction> findAll();
 }

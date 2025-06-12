@@ -30,17 +30,13 @@ public class TransactionEntity {
     @Column(nullable = false)
     private LocalDateTime date;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Transaction.Status status;
 
-    @ManyToOne
-    @JoinColumn(name = "source_product_id", foreignKey = @ForeignKey(name = "fk_transaction_source_product"))
-    private ProductEntity sourceProduct;
+    // Cambia de relación a campo String + FK manual
+    @Column(name = "source_account_number", length = 10)
+    private String sourceAccountNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "target_product_id", foreignKey = @ForeignKey(name = "fk_transaction_target_product"))
-    private ProductEntity targetProduct;
+    @Column(name = "target_account_number", length = 10)
+    private String targetAccountNumber;
 
     private String description;
 

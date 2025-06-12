@@ -8,10 +8,12 @@ import java.math.BigDecimal;
 
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TransactionCreateDTO {
     private String type;
     private BigDecimal amount;
-    private Long sourceProductId;
-    private Long targetProductId;
+    private String sourceProductId;
+    private String targetProductId;
     private String description;
 }

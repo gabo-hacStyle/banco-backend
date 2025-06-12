@@ -5,11 +5,11 @@ package gabs.infrastructure.repository.adapter;
 
 import gabs.domain.entity.Transaction;
 import gabs.domain.ports.TransactionRepository;
-import gabs.infrastructure.repository.entity.ProductEntity;
+
 import gabs.infrastructure.repository.entity.TransactionEntity;
 import gabs.infrastructure.repository.mapper.TransactionMapper;
 import gabs.infrastructure.repository.springdata.SpringDataTransactionRepository;
-import gabs.infrastructure.repository.springdata.SpringDataProductRepository;
+
 import org.springframework.stereotype.Repository;
 
 
@@ -21,22 +21,20 @@ import java.util.stream.Collectors;
 public class JpaTransactionRepository implements TransactionRepository {
 
     private final SpringDataTransactionRepository txRepo;
-    private final SpringDataProductRepository productRepo;
 
-    public JpaTransactionRepository(SpringDataTransactionRepository txRepo, SpringDataProductRepository productRepo) {
+
+    public JpaTransactionRepository(SpringDataTransactionRepository txRepo) {
         this.txRepo = txRepo;
-        this.productRepo = productRepo;
+
     }
 
     @Override
     public Transaction save(Transaction transaction) {
-        ProductEntity source = transaction.getSourceProductId() != null ?
-                productRepo.findById(transaction.getSourceProductId()).orElse(null) : null;
-        ProductEntity target = transaction.getTargetProductId() != null ?
-                productRepo.findById(transaction.getTargetProductId()).orElse(null) : null;
+        TransactionEntity entity = TransactionMapper.toEntity(transaction);
 
-        TransactionEntity entity = TransactionMapper.toEntity(transaction, source, target);
+        System.out.println("Saving TransactionEntity: " + entity);
         TransactionEntity saved = txRepo.save(entity);
+        System.out.println("Saved TransactionEntity: " + saved);
         return TransactionMapper.toDomain(saved);
     }
 
@@ -45,9 +43,10 @@ public class JpaTransactionRepository implements TransactionRepository {
         return txRepo.findById(id).map(TransactionMapper::toDomain);
     }
 
+
     @Override
-    public List<Transaction> findByProductId(Long productId) {
-        return txRepo.findBySourceProduct_IdOrTargetProduct_Id(productId, productId)
+    public List<Transaction> findByProductAccountNumber(String productAccountNumber) {
+        return txRepo.findBySourceAccountNumberOrTargetAccountNumber(productAccountNumber, productAccountNumber)
                 .stream().map(TransactionMapper::toDomain).collect(Collectors.toList());
     }
 

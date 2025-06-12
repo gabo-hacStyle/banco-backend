@@ -11,6 +11,7 @@ import gabs.domain.ports.TransactionRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,21 +34,21 @@ public class TransactionService implements TransactionUseCases {
         Product source = null;
         Product target = null;
 
+
         if (String.valueOf(Transaction.Type.DEPOSIT).equalsIgnoreCase(dto.getType())) {
             Transaction.Type type = Transaction.Type.valueOf(dto.getType());
-            target = productRepository.findById(dto.getTargetProductId())
+            target = productRepository.findByAccountNumber(dto.getTargetProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Cuenta destino no existe"));
-
             target.updateBalance(target.getBalance().add(amount));
             productRepository.save(target);
 
             return transactionRepository.save(
-                    new Transaction(null, type, amount, null, Transaction.Status.SUCCESS, null, target.getId(), dto.getDescription())
+                    new Transaction(null, type, amount, LocalDateTime.now(),  null, target.getAccountNumber(), dto.getDescription())
             );
         }
         else if (String.valueOf(Transaction.Type.WITHDRAWAL).equalsIgnoreCase(dto.getType())) {
             Transaction.Type type = Transaction.Type.valueOf(dto.getType());
-            source = productRepository.findById(dto.getSourceProductId())
+            source = productRepository.findByAccountNumber(dto.getSourceProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Cuenta origen no existe"));
             if (source.getBalance().compareTo(amount) < 0)
                 throw new IllegalArgumentException("Saldo insuficiente para retiro");
@@ -56,14 +57,14 @@ public class TransactionService implements TransactionUseCases {
             productRepository.save(source);
 
             return transactionRepository.save(
-                    new Transaction(null, type, amount, null, Transaction.Status.SUCCESS, source.getId(), null, dto.getDescription())
+                    new Transaction(null, type, amount, LocalDateTime.now(),source.getAccountNumber(), null, dto.getDescription())
             );
         }
         else if  (String.valueOf(Transaction.Type.TRANSFER).equalsIgnoreCase(dto.getType())) {
             Transaction.Type type = Transaction.Type.valueOf(dto.getType());
-            source = productRepository.findById(dto.getSourceProductId())
+            source = productRepository.findByAccountNumber(dto.getSourceProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Cuenta origen no existe"));
-            target = productRepository.findById(dto.getTargetProductId())
+            target = productRepository.findByAccountNumber(dto.getTargetProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Cuenta destino no existe"));
             if (source.getBalance().compareTo(amount) < 0)
                 throw new IllegalArgumentException("Saldo insuficiente para transferir");
@@ -78,10 +79,10 @@ public class TransactionService implements TransactionUseCases {
 
             // Genera dos movimientos: débito y crédito
             transactionRepository.save(
-                    new Transaction(null, type, amount.negate(), null, Transaction.Status.SUCCESS, source.getId(), target.getId(), "Débito transferencia: " + dto.getDescription())
+                    new Transaction(null, type, amount.negate(), LocalDateTime.now(),  source.getAccountNumber(), target.getAccountNumber(), "Débito transferencia: " + dto.getDescription())
             );
             return transactionRepository.save(
-                    new Transaction(null, type, amount, null, Transaction.Status.SUCCESS, source.getId(), target.getId(), "Crédito transferencia: " + dto.getDescription())
+                    new Transaction(null, type, amount, LocalDateTime.now(),  source.getAccountNumber(), target.getAccountNumber(), "Crédito transferencia: " + dto.getDescription())
             );
         } else {
 
@@ -95,9 +96,12 @@ public class TransactionService implements TransactionUseCases {
         return transactionRepository.findById(id);
 
     }
+
+
+
     @Override
-    public List<Transaction> findByProductId(Long productId) {
-        return transactionRepository.findByProductId(productId);
+    public List<Transaction> findByProductAccountNumber(String productAccountNumber) {
+        return transactionRepository.findByProductAccountNumber(productAccountNumber);
     }
     @Override
     public List<Transaction> findAll() {

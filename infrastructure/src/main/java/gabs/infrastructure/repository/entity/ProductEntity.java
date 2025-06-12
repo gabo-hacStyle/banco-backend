@@ -37,6 +37,8 @@ public class ProductEntity {
 
     private LocalDateTime updateDate;
 
+
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "client_id", nullable = false, foreignKey = @ForeignKey(name = "fk_product_client"))
     private ClientEntity client;

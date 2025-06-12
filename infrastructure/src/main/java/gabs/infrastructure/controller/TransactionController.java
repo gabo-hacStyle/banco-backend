@@ -15,14 +15,15 @@ import java.util.List;
 public class TransactionController {
 
     private final TransactionUseCases transactionService;
-    public TransactionController(TransactionService transactionService) {
+    public TransactionController(TransactionUseCases transactionService) {
         this.transactionService = transactionService;
     }
 
     @PostMapping
-    public ResponseEntity<Transaction> create(@RequestBody TransactionCreateDTO dto) {
-        Transaction created = transactionService.createTransaction(dto);
-        return ResponseEntity.ok(created);
+    public Transaction create(@RequestBody TransactionCreateDTO dto) {
+
+
+        return transactionService.createTransaction(dto);
     }
 
     @GetMapping("/{id}")
@@ -32,9 +33,9 @@ public class TransactionController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/product/{productId}")
-    public ResponseEntity<List<Transaction>> findByProduct(@PathVariable Long productId) {
-        return ResponseEntity.ok(transactionService.findByProductId(productId));
+    @GetMapping("/product/{productAccountNumber}")
+    public ResponseEntity<List<Transaction>> findByProduct(@PathVariable String productAccountNumber) {
+        return ResponseEntity.ok(transactionService.findByProductAccountNumber(productAccountNumber));
     }
 
     @GetMapping
