@@ -4,6 +4,8 @@ import gabs.application.dto.ClientDTO;
 import gabs.application.dto.CreateClientDTO;
 import gabs.application.ports.ClientUseCase;
 import gabs.domain.entity.Client;
+
+import gabs.domain.exceptions.NotFoundException;
 import gabs.domain.ports.ClientRepository;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +36,7 @@ public class ClientService  implements ClientUseCase {
     @Override
     public ClientDTO updateClient(Long id, CreateClientDTO dto) {
         Optional<Client> opt = clientRepository.findById(id);
-        if (opt.isEmpty()) throw new IllegalArgumentException("Cliente no encontrado");
+        if (opt.isEmpty()) throw new NotFoundException("Cliente no encontrado");
 
         Client client = opt.get();
         if (dto.identificationType != null) client.setIdentificationType(dto.identificationType);
@@ -51,10 +53,19 @@ public class ClientService  implements ClientUseCase {
 
     @Override
     public void deleteClient(Long id) {
+        ClientDTO client = this.getClientById(id);
+
+
         if (clientRepository.hasLinkedProducts(id)) {
             throw new IllegalArgumentException("No se puede eliminar el cliente porque tiene productos vinculados");
         }
-        clientRepository.deleteById(id);
+        if(clientRepository.findById(id).isPresent()) {
+            clientRepository.deleteById(id);
+        }
+        else {
+            throw new NotFoundException("Cliente no encontrado");
+        }
+
     }
 
     @Override
@@ -64,7 +75,9 @@ public class ClientService  implements ClientUseCase {
 
     @Override
     public ClientDTO getClientById(Long id) {
-        return clientRepository.findById(id).map(this::toDTO).orElse(null);
+        return clientRepository.findById(id).map(this::toDTO)
+                .orElseThrow(() -> new NotFoundException("Cliente no encontrado"));
+
     }
 
     private ClientDTO toDTO(Client client) {

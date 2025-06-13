@@ -3,6 +3,7 @@ package gabs.application.service;
 import gabs.application.dto.ClientDTO;
 import gabs.application.dto.CreateClientDTO;
 import gabs.domain.entity.Client;
+import gabs.domain.exceptions.NotFoundException;
 import gabs.domain.ports.ClientRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -78,23 +80,21 @@ class ClientServiceTest {
         Assertions.assertEquals("El email no tiene un formato válido", exception.getMessage());
     }
 
-   // @Test
-   // void createClient() {
-   // }
-//
-   // @Test
-   // void updateClient() {
-   // }
-//
-   // @Test
-   // void deleteClient() {
-   // }
-//
-   // @Test
-   // void getAllClients() {
-   // }
-//
-   // @Test
-   // void getClientById() {
-   // }
+    @Test
+    void deleteClientShouldReturnNotFoundIfNotFound(){
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        Exception ex = Assertions.assertThrows(NotFoundException.class, () -> service.deleteClient(1L));
+        Assertions.assertEquals("Cliente no encontrado", ex.getMessage());
+    }
+    @Test
+    void updateClientShouldReturnNotFoundIfNotFound(){
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+        CreateClientDTO updatedValues = new CreateClientDTO("CC", "1234567", "Ana", "Lopez", "anamail.com", LocalDate.now().minusYears(20));
+
+
+        Exception ex = Assertions.assertThrows(NotFoundException.class,
+                () -> service.updateClient(1L,updatedValues ));
+        Assertions.assertEquals("Cliente no encontrado", ex.getMessage());
+    }
 }
