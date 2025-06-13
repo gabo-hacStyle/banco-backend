@@ -13,6 +13,6 @@ public interface ProductUseCases {
     Product inactivateProduct(String accountNumber);
     Product cancelProduct(String accountNumber);
 
-    Optional<Product> findByAccountNumber(String accountNumber);
+    Product findByAccountNumber(String accountNumber);
     List<Product> findByClientId(Long clientId);
 }

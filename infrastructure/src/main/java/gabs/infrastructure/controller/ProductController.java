@@ -29,9 +29,8 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> getById(@PathVariable String id) {
-        return productService.findByAccountNumber(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Product product = productService.findByAccountNumber(id);
+        return ResponseEntity.ok(product);
     }
 
 
@@ -40,12 +39,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.findByClientId(clientId));
     }
 
-    @GetMapping("/number/{accountNumber}")
-    public ResponseEntity<Product> getByAccountNumber(@PathVariable String accountNumber) {
-        return productService.findByAccountNumber(accountNumber)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+
 
     @PutMapping("/{accountNumber}/enable")
     public Product enable(@PathVariable String accountNumber) {

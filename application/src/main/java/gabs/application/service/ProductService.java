@@ -4,6 +4,7 @@ package gabs.application.service;
 import gabs.application.ports.ProductUseCases;
 import gabs.domain.entity.Product;
 import gabs.domain.entity.ProductNumberGenerator;
+import gabs.domain.exceptions.NotFoundException;
 import gabs.domain.ports.ClientRepository;
 import gabs.domain.ports.ProductRepository;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,7 @@ public class ProductService implements ProductUseCases {
     @Override
     public Product createProduct(ProductCreateDTO dto) {
         if (clientRepository.findById(dto.getClientId()).isEmpty()) {
-            throw new IllegalArgumentException("Cliente no existe");
+            throw new NotFoundException("Cliente no existe");
         }
 
         if (dto.isExemptGMF()) {
@@ -73,7 +74,7 @@ public class ProductService implements ProductUseCases {
     public Product activateProduct(String accountNumber) {
 
         Optional<Product> product = productRepository.findByAccountNumber(accountNumber);
-        if (product.isEmpty()) throw new IllegalArgumentException("Producto no encontrado");
+        if (product.isEmpty()) throw new NotFoundException("Producto no encontrado");
 
         Product prod = product.get();
         prod.activate();
@@ -85,7 +86,7 @@ public class ProductService implements ProductUseCases {
     @Override
     public Product inactivateProduct(String accountNumber) {
         Optional<Product> product = productRepository.findByAccountNumber(accountNumber);
-        if (product.isEmpty()) throw new IllegalArgumentException("Producto no encontrado");
+        if (product.isEmpty()) throw new NotFoundException("Producto no encontrado");
 
         Product prod = product.get();
         prod.inactivate();
@@ -97,7 +98,7 @@ public class ProductService implements ProductUseCases {
     @Override
     public Product cancelProduct(String accountNumber) {
         Optional<Product> product = productRepository.findByAccountNumber(accountNumber);
-        if (product.isEmpty()) throw new IllegalArgumentException("Producto no encontrado");
+        if (product.isEmpty()) throw new NotFoundException("Producto no encontrado");
         Product prod = product.get();
         prod.cancel();
         productRepository.save(prod);
@@ -106,12 +107,23 @@ public class ProductService implements ProductUseCases {
     }
 
     @Override
-    public Optional<Product> findByAccountNumber(String accountNumber) {
-        return productRepository.findByAccountNumber(accountNumber);
+    public Product findByAccountNumber(String accountNumber) {
+        Optional<Product> opt = productRepository.findByAccountNumber(accountNumber);
+        if (opt.isEmpty()) throw new NotFoundException("Producto no encontrado");
+        else {
+            return opt.get();
+        }
+
     }
     @Override
     public List<Product> findByClientId(Long clientId) {
-        return productRepository.findByClientId(clientId);
+        if (clientRepository.findById(clientId).isEmpty()) {
+            throw new NotFoundException("Cliente no existe");
+        } else {
+            return productRepository.findByClientId(clientId);
+        }
+
+
     }
 
 

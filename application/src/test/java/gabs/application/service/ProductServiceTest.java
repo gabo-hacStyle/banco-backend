@@ -3,6 +3,7 @@ package gabs.application.service;
 import gabs.application.dto.ProductCreateDTO;
 import gabs.domain.entity.Client;
 import gabs.domain.entity.Product;
+import gabs.domain.exceptions.NotFoundException;
 import gabs.domain.ports.ClientRepository;
 import gabs.domain.ports.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +58,7 @@ class ProductServiceTest {
         when(repoClient.findById(99L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        Exception ex = assertThrows(IllegalArgumentException.class, () -> service.createProduct(dto));
+        Exception ex = assertThrows(NotFoundException.class, () -> service.createProduct(dto));
         assertTrue(ex.getMessage().contains("Cliente no existe"));
         verify(repo, never()).save(any());
     }
@@ -124,6 +125,36 @@ class ProductServiceTest {
         Exception ex = assertThrows(IllegalArgumentException.class,
                 () -> service.createProduct(dto));
         assertEquals("El cliente ya tiene una cuenta exenta de GMF", ex.getMessage());
+    }
+
+    @Test
+    void shouldThrowClientNotFoundWhenFindByClientIdIsEmpty() {
+        when(repoClient.findById(99L)).thenReturn(Optional.empty());
+
+        Exception ex = assertThrows(NotFoundException.class,
+                () -> service.findByClientId(99L));
+        assertEquals("Cliente no existe", ex.getMessage());
+    }
+
+    @Test
+    void shouldThrowIfProductDoesntExistWhenActivate(){
+        when(repo.findByAccountNumber("5301000000")).thenReturn(Optional.empty());
+        Exception ex = assertThrows(NotFoundException.class, () -> service.activateProduct("5301000000"));
+        assertTrue(ex.getMessage().contains("Producto no encontrado"));
+    }
+
+    @Test
+    void shouldThrowIfProductDoesntExistWhenInactivate(){
+        when(repo.findByAccountNumber("5301000000")).thenReturn(Optional.empty());
+        Exception ex = assertThrows(NotFoundException.class, () -> service.inactivateProduct("5301000000"));
+        assertTrue(ex.getMessage().contains("Producto no encontrado"));
+    }
+
+    @Test
+    void shouldThrowIfProductDoesntExistWhenCancelling(){
+        when(repo.findByAccountNumber("5301000000")).thenReturn(Optional.empty());
+        Exception ex = assertThrows(NotFoundException.class, () -> service.cancelProduct("5301000000"));
+        assertTrue(ex.getMessage().contains("Producto no encontrado"));
     }
 
 }
