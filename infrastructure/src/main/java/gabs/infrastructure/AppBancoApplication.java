@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "gabs.infrastructure",
         "gabs.application"
 })
-@EnableJpaRepositories(basePackages = "gabs.infrastructure.repository.springdata")
+
 public class AppBancoApplication {
 
     public static void main(String[] args) {
