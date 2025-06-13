@@ -27,9 +27,9 @@ public class ProductController {
         return ResponseEntity.ok(created);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Product> getById(@PathVariable String id) {
-        Product product = productService.findByAccountNumber(id);
+    @GetMapping("/{productNumber}")
+    public ResponseEntity<Product> getByAccountNumber(@PathVariable String productNumber) {
+        Product product = productService.findByAccountNumber(productNumber);
         return ResponseEntity.ok(product);
     }
 
