@@ -42,7 +42,7 @@ class ProductControllerTest {
 
     private Product productSaving;
     private Product productChecking;
-    private ProductCreateDTO createDTOSavings;
+
 
     @BeforeEach
     void setUp() {

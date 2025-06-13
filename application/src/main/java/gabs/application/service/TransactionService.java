@@ -5,6 +5,7 @@ import gabs.application.dto.TransactionCreateDTO;
 import gabs.application.ports.TransactionUseCases;
 import gabs.domain.entity.Product;
 import gabs.domain.entity.Transaction;
+import gabs.domain.exceptions.NotFoundException;
 import gabs.domain.ports.ProductRepository;
 import gabs.domain.ports.TransactionRepository;
 
@@ -41,7 +42,7 @@ public class TransactionService implements TransactionUseCases {
 
             Transaction.Type type = Transaction.Type.valueOf(dto.getType());
             target = productRepository.findByAccountNumber(dto.getTargetProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("Cuenta destino no existe"));
+                    .orElseThrow(() -> new NotFoundException("Cuenta destino no existe"));
 
             if (target.getStatus() != Product.Status.ACTIVE) {
                 throw new IllegalArgumentException("No se puede hacer depósito a una cuenta inactiva o cancelada");
@@ -57,7 +58,7 @@ public class TransactionService implements TransactionUseCases {
         else if (String.valueOf(Transaction.Type.WITHDRAWAL).equalsIgnoreCase(dto.getType())) {
             Transaction.Type type = Transaction.Type.valueOf(dto.getType());
             source = productRepository.findByAccountNumber(dto.getSourceProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("Cuenta origen no existe"));
+                    .orElseThrow(() -> new NotFoundException("Cuenta origen no existe"));
 
             if (source.getStatus() != Product.Status.ACTIVE) {
                 throw new IllegalArgumentException("No se puede hacer retiro desde una cuenta inactiva o cancelada");
@@ -75,9 +76,9 @@ public class TransactionService implements TransactionUseCases {
         else if  (String.valueOf(Transaction.Type.TRANSFER).equalsIgnoreCase(dto.getType())) {
             Transaction.Type type = Transaction.Type.valueOf(dto.getType());
             source = productRepository.findByAccountNumber(dto.getSourceProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("Cuenta origen no existe"));
+                    .orElseThrow(() -> new NotFoundException("Cuenta origen no existe"));
             target = productRepository.findByAccountNumber(dto.getTargetProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("Cuenta destino no existe"));
+                    .orElseThrow(() -> new NotFoundException("Cuenta destino no existe"));
 
             if (source.getStatus() != Product.Status.ACTIVE) {
                 throw new IllegalArgumentException("No se puede transferir desde una cuenta inactiva o cancelada");
@@ -112,8 +113,13 @@ public class TransactionService implements TransactionUseCases {
     }
 
     @Override
-    public Optional<Transaction> findById(Long id) {
-        return transactionRepository.findById(id);
+    public Transaction findById(Long id) {
+        Optional<Transaction> opt = transactionRepository.findById(id);
+        if (opt.isEmpty()) throw new NotFoundException("Transacción no encontrada");
+        else{
+            return opt.get();
+        }
+
 
     }
 
@@ -121,7 +127,13 @@ public class TransactionService implements TransactionUseCases {
 
     @Override
     public List<Transaction> findByProductAccountNumber(String productAccountNumber) {
-        return transactionRepository.findByProductAccountNumber(productAccountNumber);
+        if(productRepository.findByAccountNumber(productAccountNumber).isEmpty()){
+            throw new NotFoundException("Producto no encontrado");
+        }else {
+            return transactionRepository.findByProductAccountNumber(productAccountNumber);
+        }
+
+
     }
     @Override
     public List<Transaction> findAll() {

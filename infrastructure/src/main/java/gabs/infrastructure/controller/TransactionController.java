@@ -28,9 +28,8 @@ public class TransactionController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Transaction> getById(@PathVariable Long id) {
-        return transactionService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Transaction transaction = transactionService.findById(id);
+        return ResponseEntity.ok(transaction);
     }
 
     @GetMapping("/product/{productAccountNumber}")

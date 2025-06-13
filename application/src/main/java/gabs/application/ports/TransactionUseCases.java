@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface TransactionUseCases {
     Transaction createTransaction(TransactionCreateDTO dto);
-    Optional<Transaction> findById(Long id);
+    Transaction findById(Long id);
 
 
     List<Transaction> findByProductAccountNumber(String productAccountNumber);

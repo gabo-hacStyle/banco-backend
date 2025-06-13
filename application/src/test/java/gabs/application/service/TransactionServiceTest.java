@@ -3,6 +3,7 @@ package gabs.application.service;
 import gabs.application.dto.TransactionCreateDTO;
 import gabs.domain.entity.Product;
 import gabs.domain.entity.Transaction;
+import gabs.domain.exceptions.NotFoundException;
 import gabs.domain.ports.ProductRepository;
 import gabs.domain.ports.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,8 +42,10 @@ class TransactionServiceTest {
     @Test
     void createsDeposit_andUpdatesBalance() {
         Product target = mock(Product.class);
+
         when(productRepository.findByAccountNumber("2L")).thenReturn(Optional.of(target));
         when(target.getBalance()).thenReturn(new BigDecimal("1000.00"));
+        when(target.getStatus()).thenReturn(Product.Status.ACTIVE);
         when(transactionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         TransactionCreateDTO dto = createDto("DEPOSIT", null, "2L", "1000.00");
@@ -61,6 +64,7 @@ class TransactionServiceTest {
         Product source = mock(Product.class);
         when(productRepository.findByAccountNumber("10L")).thenReturn(Optional.of(source));
         when(source.getBalance()).thenReturn(new BigDecimal("300.00"));
+        when(source.getStatus()).thenReturn(Product.Status.ACTIVE);
         when(transactionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         TransactionCreateDTO dto = createDto("WITHDRAWAL", "10L", null, "100.00");
@@ -82,6 +86,8 @@ class TransactionServiceTest {
         when(productRepository.findByAccountNumber("2L")).thenReturn(Optional.of(target));
         when(source.getBalance()).thenReturn(new BigDecimal("400.00"));
         when(target.getBalance()).thenReturn(new BigDecimal("50.00"));
+        when(target.getStatus()).thenReturn(Product.Status.ACTIVE);
+        when(source.getStatus()).thenReturn(Product.Status.ACTIVE);
         when(transactionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         TransactionCreateDTO dto = createDto("TRANSFER", "1L", "2L", "150.00");
@@ -179,7 +185,7 @@ class TransactionServiceTest {
     void deposit_failsIfTargetAccountDoesNotExist() {
         when(productRepository.findByAccountNumber("42L")).thenReturn(Optional.empty());
         TransactionCreateDTO dto = createDto("DEPOSIT", null, "42L", "100.00");
-        Exception ex = assertThrows(IllegalArgumentException.class, () -> service.createTransaction(dto));
+        Exception ex = assertThrows(NotFoundException.class, () -> service.createTransaction(dto));
         assertEquals("Cuenta destino no existe", ex.getMessage());
     }
 
@@ -187,7 +193,7 @@ class TransactionServiceTest {
     void withdrawal_failsIfSourceAccountDoesNotExist() {
         when(productRepository.findByAccountNumber("84L")).thenReturn(Optional.empty());
         TransactionCreateDTO dto = createDto("WITHDRAWAL", "84L", null, "50.00");
-        Exception ex = assertThrows(IllegalArgumentException.class, () -> service.createTransaction(dto));
+        Exception ex = assertThrows(NotFoundException.class, () -> service.createTransaction(dto));
         assertEquals("Cuenta origen no existe", ex.getMessage());
     }
 
@@ -195,7 +201,7 @@ class TransactionServiceTest {
     void transfer_failsIfSourceAccountDoesNotExist() {
         when(productRepository.findByAccountNumber("1L")).thenReturn(Optional.empty());
         TransactionCreateDTO dto = createDto("TRANSFER", "1L", "2L", "30.00");
-        Exception ex = assertThrows(IllegalArgumentException.class, () -> service.createTransaction(dto));
+        Exception ex = assertThrows(NotFoundException.class, () -> service.createTransaction(dto));
         assertEquals("Cuenta origen no existe", ex.getMessage());
     }
 
@@ -206,9 +212,33 @@ class TransactionServiceTest {
         when(productRepository.findByAccountNumber("2L")).thenReturn(Optional.empty());
         when(source.getBalance()).thenReturn(new BigDecimal("100.00"));
         TransactionCreateDTO dto = createDto("TRANSFER", "1L", "2L", "30.00");
-        Exception ex = assertThrows(IllegalArgumentException.class, () -> service.createTransaction(dto));
+        Exception ex = assertThrows(NotFoundException.class, () -> service.createTransaction(dto));
         assertEquals("Cuenta destino no existe", ex.getMessage());
     }
+
+
+    @Test
+    void shouldThrowIfTransactionDoesntExist(){
+        when(transactionRepository.findById(1L)).thenReturn(Optional.empty());
+
+
+        Exception ex = assertThrows(NotFoundException.class, () -> service.findById(1L));
+        assertEquals("Transacción no encontrada", ex.getMessage());
+    }
+
+    @Test
+    void shouldThrowFindByProductIfProductDoesntExist(){
+
+        when(productRepository.findByAccountNumber("2L")).thenReturn(Optional.empty());
+
+        Exception ex = assertThrows(NotFoundException.class, () -> service.findByProductAccountNumber("5301000000"));
+        assertEquals("Producto no encontrado", ex.getMessage());
+
+
+
+    }
+
+
 
     // --- Helpers ---
 
